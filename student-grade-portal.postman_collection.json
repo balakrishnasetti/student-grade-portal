@@ -1,0 +1,556 @@
+{
+  "info": {
+    "name": "Student Grade Portal API",
+    "description": "Phase 8 collection for all 17 Student Grade Portal endpoints, including negative validation and authorization cases.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "studentId",
+      "value": "507f1f77bcf86cd799439011"
+    },
+    {
+      "key": "markId",
+      "value": "507f1f77bcf86cd799439012"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register teacher",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Teacher\",\n  \"email\": \"teacher.postman@example.com\",\n  \"password\": \"secret123\",\n  \"role\": \"teacher\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 201', function () { pm.response.to.have.status(201); });",
+                "const json = pm.response.json();",
+                "pm.test('success is true', function () { pm.expect(json.success).to.eql(true); });",
+                "pm.test('token is present', function () { pm.expect(json.data.token).to.be.a('string').and.not.empty; });",
+                "pm.environment.set('token', json.data.token);"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"teacher.postman@example.com\",\n  \"password\": \"secret123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                "const json = pm.response.json();",
+                "pm.test('success is true', function () { pm.expect(json.success).to.eql(true); });",
+                "pm.test('token is present', function () { pm.expect(json.data.token).to.be.a('string').and.not.empty; });",
+                "pm.environment.set('token', json.data.token);"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Get current user",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/auth/me"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                "const json = pm.response.json();",
+                "pm.test('success is true', function () { pm.expect(json.success).to.eql(true); });",
+                "pm.test('password is not exposed', function () { pm.expect(json.data.user).to.not.have.property('password'); });"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Duplicate email (negative)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Duplicate Teacher\",\n  \"email\": \"teacher.postman@example.com\",\n  \"password\": \"secret123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 409', function () { pm.response.to.have.status(409); });",
+                "const json = pm.response.json();",
+                "pm.test('success is false', function () { pm.expect(json.success).to.eql(false); });"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Short password (negative)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Short Password\",\n  \"email\": \"short.postman@example.com\",\n  \"password\": \"123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 400', function () { pm.response.to.have.status(400); });",
+                "const json = pm.response.json();",
+                "pm.test('success is false', function () { pm.expect(json.success).to.eql(false); });"
+              ]
+            }
+          }]
+        }
+      ]
+    },
+    {
+      "name": "Students",
+      "item": [
+        {
+          "name": "Create student",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rollNo\": \"PM-001\",\n  \"name\": \"Postman Student\",\n  \"email\": \"student.postman@example.com\",\n  \"className\": \"10\",\n  \"section\": \"A\",\n  \"academicYear\": \"2026\"\n}"
+            },
+            "url": "{{baseUrl}}/students"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 201', function () { pm.response.to.have.status(201); });",
+                "const json = pm.response.json();",
+                "pm.test('success is true', function () { pm.expect(json.success).to.eql(true); });",
+                "pm.test('student id is present', function () { pm.expect(json.data._id).to.be.a('string').and.not.empty; });",
+                "pm.environment.set('studentId', json.data._id);"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "List students",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/students?page=1&limit=10&sort=newest"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                "const json = pm.response.json();",
+                "pm.test('success is true', function () { pm.expect(json.success).to.eql(true); });",
+                "pm.test('data is an array', function () { pm.expect(json.data).to.be.an('array'); });"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Get student",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/students/{{studentId}}"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                "const json = pm.response.json();",
+                "pm.test('success is true', function () { pm.expect(json.success).to.eql(true); });"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Update student",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Postman Student\",\n  \"section\": \"B\"\n}"
+            },
+            "url": "{{baseUrl}}/students/{{studentId}}"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                "const json = pm.response.json();",
+                "pm.test('success is true', function () { pm.expect(json.success).to.eql(true); });"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Toppers",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/students/top?limit=10&className=10"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                "const json = pm.response.json();",
+                "pm.test('success is true', function () { pm.expect(json.success).to.eql(true); });",
+                "pm.test('data is an array', function () { pm.expect(json.data).to.be.an('array'); });"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Malformed student id (negative)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/students/not-an-object-id"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 400', function () { pm.response.to.have.status(400); });",
+                "const json = pm.response.json();",
+                "pm.test('success is false', function () { pm.expect(json.success).to.eql(false); });"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Request with no token (negative)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": "{{baseUrl}}/students"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 401', function () { pm.response.to.have.status(401); });",
+                "const json = pm.response.json();",
+                "pm.test('success is false', function () { pm.expect(json.success).to.eql(false); });"
+              ]
+            }
+          }]
+        }
+      ]
+    },
+    {
+      "name": "Marks",
+      "item": [
+        {
+          "name": "Create mark",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"student\": \"{{studentId}}\",\n  \"subject\": \"Mathematics\",\n  \"examType\": \"final\",\n  \"score\": 86,\n  \"maxScore\": 100\n}"
+            },
+            "url": "{{baseUrl}}/marks"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 201', function () { pm.response.to.have.status(201); });",
+                "const json = pm.response.json();",
+                "pm.test('success is true', function () { pm.expect(json.success).to.eql(true); });",
+                "pm.test('mark id is present', function () { pm.expect(json.data._id).to.be.a('string').and.not.empty; });",
+                "pm.environment.set('markId', json.data._id);"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "List marks",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/marks?page=1&limit=10&subject=math"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                "const json = pm.response.json();",
+                "pm.test('success is true', function () { pm.expect(json.success).to.eql(true); });",
+                "pm.test('data is an array', function () { pm.expect(json.data).to.be.an('array'); });"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Get mark",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/marks/{{markId}}"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                "const json = pm.response.json();",
+                "pm.test('success is true', function () { pm.expect(json.success).to.eql(true); });",
+                "pm.test('student is populated', function () { pm.expect(json.data.student).to.be.an('object'); });"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Update mark",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"score\": 91\n}"
+            },
+            "url": "{{baseUrl}}/marks/{{markId}}"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                "const json = pm.response.json();",
+                "pm.test('success is true', function () { pm.expect(json.success).to.eql(true); });"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Subject average",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/marks/subject/Mathematics/average?className=10&examType=final"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                "const json = pm.response.json();",
+                "pm.test('success is true', function () { pm.expect(json.success).to.eql(true); });",
+                "pm.test('average data exists', function () { pm.expect(json.data).to.have.property('averagePercentage'); });"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Class summary",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/marks/class-summary?className=10"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                "const json = pm.response.json();",
+                "pm.test('success is true', function () { pm.expect(json.success).to.eql(true); });",
+                "pm.test('data is an array', function () { pm.expect(json.data).to.be.an('array'); });"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Score above maxScore (negative)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"student\": \"{{studentId}}\",\n  \"subject\": \"Physics\",\n  \"examType\": \"final\",\n  \"score\": 150,\n  \"maxScore\": 100\n}"
+            },
+            "url": "{{baseUrl}}/marks"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 400', function () { pm.response.to.have.status(400); });",
+                "const json = pm.response.json();",
+                "pm.test('success is false', function () { pm.expect(json.success).to.eql(false); });"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Duplicate mark (negative)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"student\": \"{{studentId}}\",\n  \"subject\": \"mathematics\",\n  \"examType\": \"final\",\n  \"score\": 86,\n  \"maxScore\": 100\n}"
+            },
+            "url": "{{baseUrl}}/marks"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 409', function () { pm.response.to.have.status(409); });",
+                "const json = pm.response.json();",
+                "pm.test('success is false', function () { pm.expect(json.success).to.eql(false); });"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Malformed mark id (negative)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/marks/not-an-object-id"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 400', function () { pm.response.to.have.status(400); });",
+                "const json = pm.response.json();",
+                "pm.test('success is false', function () { pm.expect(json.success).to.eql(false); });"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Delete mark",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/marks/{{markId}}"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                "const json = pm.response.json();",
+                "pm.test('success is true', function () { pm.expect(json.success).to.eql(true); });"
+              ]
+            }
+          }]
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Report card endpoint",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/students/{{studentId}}/report-card?examType=final"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                "const json = pm.response.json();",
+                "pm.test('success is true', function () { pm.expect(json.success).to.eql(true); });",
+                "pm.test('report card shape exists', function () { pm.expect(json.data).to.have.property('summary'); });"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Delete student (cleanup)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/students/{{studentId}}"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                "const json = pm.response.json();",
+                "pm.test('success is true', function () { pm.expect(json.success).to.eql(true); });"
+              ]
+            }
+          }]
+        }
+      ]
+    }
+  ]
+}
