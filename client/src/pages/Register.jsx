@@ -63,7 +63,7 @@ export default function Register() {
           {form.role === 'teacher' ? (
             <div className="form-field">
               <label htmlFor="teacher-registration-code">Teacher registration code</label>
-              <input id="teacher-registration-code" name="teacherRegistrationCode" type="password" value={form.teacherRegistrationCode} onChange={updateField} autoComplete="off" required />
+              <input id="teacher-registration-code" name="teacherRegistrationCode" type="password" value={form.teacherRegistrationCode} onChange={updateField} autoComplete="off" />
             </div>
           ) : (
             <p className="muted">Your teacher must add your email to the student record before you can register.</p>

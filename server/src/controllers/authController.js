@@ -3,6 +3,9 @@ const Student = require('../models/Student');
 const ApiError = require('../utils/ApiError');
 const asyncHandler = require('../utils/asyncHandler');
 const generateToken = require('../utils/generateToken');
+require('dotenv').config()
+
+
 
 function publicUser(user) {
   const source = typeof user.toObject === 'function' ? user.toObject() : user;
